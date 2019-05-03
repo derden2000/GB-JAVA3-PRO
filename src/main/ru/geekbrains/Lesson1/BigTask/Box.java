@@ -50,7 +50,7 @@ public class Box<T extends Fruit> {
         return boxWeight;
     }
 
-    private Box<T> replace(Box<T> fruitBox) {
+    private Box<? extends Fruit> replace(Box<T> fruitBox) {
         for (T obj: this.boxContent) {
             fruitBox.addToBox(obj);
         }
@@ -59,8 +59,9 @@ public class Box<T extends Fruit> {
     }
 
     private boolean compare(Box secondBox) {
-        if (this.getBoxWeight() == secondBox.getBoxWeight())
-        return true;
+        if (this.getBoxWeight() == secondBox.getBoxWeight()) {
+            return true;
+        }
         else
             return false;
     }
