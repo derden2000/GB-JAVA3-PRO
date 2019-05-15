@@ -62,7 +62,7 @@ public class StringHandler {
     public static User parseRegMessage(String text) {
         String[] parts = text.split(" ");
         if (parts.length == 3 && parts[0].equals(REG_PREFIX)) {
-            return new User(parts[1], parts[2]);
+            return new User(-1, parts[1], parts[2]);
         } else {
             return null;
         }

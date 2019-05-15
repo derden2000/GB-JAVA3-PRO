@@ -128,7 +128,7 @@ public class ChatServer {
             System.out.printf("Incorrect authorization message %s%n", authMessage);
             throw new AuthException();
         } else {
-            return new User(authParts[1], authParts[2]);
+            return new User(-1, authParts[1], authParts[2]);
         }
     }
 

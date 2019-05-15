@@ -33,17 +33,16 @@ public class UserRepository {
     }
 
     public static User findByLogin(String Login) throws SQLException {
-        try (Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery(String.format("select * from users where login = '%s';", Login));
-            ) {
-                String name = null, pass = null;
-                while (resultSet.next()) {
-                    name = resultSet.getString(2);
-                    pass = resultSet.getString(3);
-                }
-                return new User(name, pass);
+        try (PreparedStatement stmt = conn.prepareStatement("select id, login, password from users where login = ?")) {
+            stmt.setString(1, Login);
+            ResultSet rSet = stmt.executeQuery();
+
+            if (rSet.next()) {
+                    return new User(rSet.getInt(1), rSet.getString(2), rSet.getString(3));
             }
         }
+        return new User(-1, "", "");
+    }
 
     public List<User> getAllUsers() throws SQLException {
         ArrayList<User> result = new ArrayList<>();
@@ -52,7 +51,7 @@ public class UserRepository {
         )
         {
             while (resultSet.next()) {
-            result.add(new User(resultSet.getString(2),resultSet.getString(3)));
+            result.add(new User(resultSet.getInt(1), resultSet.getString(2),resultSet.getString(3)));
             }
         }
 
