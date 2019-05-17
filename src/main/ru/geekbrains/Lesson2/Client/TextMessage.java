@@ -1,8 +1,9 @@
 package main.ru.geekbrains.Lesson2.Client;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class TextMessage {
+public class TextMessage implements Serializable {
 
     private LocalDateTime created;
 
@@ -23,20 +24,12 @@ public class TextMessage {
         return userFrom;
     }
 
-    public void setUserFrom(String userFrom) {
-        this.userFrom = userFrom;
-    }
-
     public String getUserTo() {
         return userTo;
     }
 
     public String getText() {
         return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public LocalDateTime getCreated() {
