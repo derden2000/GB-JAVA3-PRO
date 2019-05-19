@@ -1,5 +1,6 @@
 package main.ru.geekbrains.Lesson2.Client.swing;
 
+import main.ru.geekbrains.Lesson2.Client.MessageBackup;
 import main.ru.geekbrains.Lesson2.Client.MessageReciever;
 import main.ru.geekbrains.Lesson2.Client.Network;
 import main.ru.geekbrains.Lesson2.Client.TextMessage;
@@ -8,10 +9,9 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -32,6 +32,8 @@ public class MainWindow extends JFrame implements MessageReciever {
     private final JTextField messageField;
 
     private final Network network;
+
+    private final MessageBackup messageBackup;
 
     private final JList<String> userList;
 
@@ -66,8 +68,10 @@ public class MainWindow extends JFrame implements MessageReciever {
                 if (text != null && !text.trim().isEmpty()) {
                     TextMessage msg = new TextMessage(network.getLogin(), userList.getSelectedValue(), text);
                     messageListModel.add(messageListModel.size(), msg);
+                    messageList.ensureIndexIsVisible(messageListModel.size() - 1);
                     messageField.setText(null);
                     network.sendTextMessage(msg);
+                    messageBackup.addToList(msg);
                 } else {
                     JOptionPane.showMessageDialog(MainWindow.this,
                             "Сообщение пустое. Введите новое сообщение",
@@ -79,6 +83,37 @@ public class MainWindow extends JFrame implements MessageReciever {
 
         sendMessagePanel.add(sendButton, BorderLayout.EAST);
         messageField = new JTextField();
+        messageField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String text = messageField.getText();
+                    if (text != null && !text.trim().isEmpty()) {
+                        TextMessage msg = new TextMessage(network.getLogin(), userList.getSelectedValue(), text);
+                        messageListModel.add(messageListModel.size(), msg);
+                        messageList.ensureIndexIsVisible(messageListModel.size() - 1);
+                        messageField.setText(null);
+                        network.sendTextMessage(msg);
+                        messageBackup.addToList(msg);
+                    } else {
+                        JOptionPane.showMessageDialog(MainWindow.this,
+                                "Сообщение пустое. Введите новое сообщение",
+                                "Ошибка",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
         sendMessagePanel.add(messageField, BorderLayout.CENTER);
 
         userList = new JList<>();
@@ -124,13 +159,29 @@ public class MainWindow extends JFrame implements MessageReciever {
                 if (network != null) {
                     network.close();
                 }
+                try {
+                    messageBackup.writeToFile();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 super.windowClosing(e);
             }
         });
 
         setTitle("Сетевой чат. Пользователь " + network.getLogin());
 
+        messageBackup = new MessageBackup(Paths.get(String.format("%s_message_backup.dat", network.getLogin())));
+        initMessageArchive();
 
+    }
+
+    private void initMessageArchive() {
+        if (messageBackup.getMessageList().size()!=0) {
+            for (int i = 0; i < messageBackup.getMessageList().size(); i++) {
+                messageListModel.add(messageListModel.size(), (TextMessage) messageBackup.getMessageList().get(i));
+                messageList.ensureIndexIsVisible(messageListModel.size() - 1);
+            }
+        }
     }
 
     @Override
@@ -140,6 +191,7 @@ public class MainWindow extends JFrame implements MessageReciever {
             public void run() {
                 messageListModel.add(messageListModel.size(), message);
                 messageList.ensureIndexIsVisible(messageListModel.size() - 1);
+                messageBackup.addToList(message);
             }
         });
     }
