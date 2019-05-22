@@ -17,6 +17,8 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static main.ru.geekbrains.Lesson2.Client.MessagePatterns.*;
 
@@ -31,6 +33,10 @@ public class ChatServer {
 
     public static Map<String, ClientHandler> clientHandlerMap = Collections.synchronizedMap(new HashMap<>());
 
+    static ExecutorService executorService;
+
+    public volatile int numTasks;
+
     public static void main(String[] args) {
 
         try {
@@ -42,6 +48,7 @@ public class ChatServer {
                     "root", "12345");
             userRepository = new UserRepository(conn);
             authServiceJdbc = new AuthServiceJdbcImpl(userRepository);
+            executorService = Executors.newFixedThreadPool(2);
         } catch (SQLException e) {
             e.printStackTrace();
             return;
@@ -78,7 +85,7 @@ public class ChatServer {
                     socket.close();
                 }
 
-                if (user != null && authServiceJdbc.authUser(user)) {
+                if (user != null && authServiceJdbc.authUser(user) && numTasks<2) {
                     System.out.printf("User %s authorized successful!%n", user.getLogin());
                     subcribe(user.getLogin(), socket);
                     out.writeUTF(AUTH_SUCCESS_RESPONSE);
@@ -98,6 +105,7 @@ public class ChatServer {
     }
 
     private void subcribe(String login, Socket socket) throws IOException {
+        numTasks++;
         if (!clientHandlerMap.containsKey(login)) {
             clientHandlerMap.put(login, new ClientHandler(login, socket, this));
             sendUserConnectedMessage(login);
@@ -108,6 +116,7 @@ public class ChatServer {
     }
 
     public void unsubscribe(String login) throws IOException {
+        numTasks--;
         serverSendDisconnectLogin(login);
         clientHandlerMap.remove(login);
     }
