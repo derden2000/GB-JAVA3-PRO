@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Future;
 
 import static main.ru.geekbrains.Lesson2.Client.MessagePatterns.*;
 
@@ -16,7 +17,7 @@ public class ClientHandler {
     private final Socket socket;
     private final DataInputStream inp;
     private final DataOutputStream out;
-    private final Thread handleThread;
+    private final Future handleThread;
     private ChatServer chatServer;
 
     public ClientHandler(String login, Socket socket, ChatServer chatServer) throws IOException {
@@ -26,7 +27,7 @@ public class ClientHandler {
         this.out = new DataOutputStream(socket.getOutputStream());
         this.chatServer = chatServer;
 
-        this.handleThread = new Thread(new Runnable() { //входящий поток сервера
+        this.handleThread = chatServer.executorService.submit(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -54,8 +55,6 @@ public class ClientHandler {
                 }
             }
         });
-        this.chatServer = chatServer;
-        this.handleThread.start();
     }
 
     public void sendMessage(TextMessage message) throws IOException {
