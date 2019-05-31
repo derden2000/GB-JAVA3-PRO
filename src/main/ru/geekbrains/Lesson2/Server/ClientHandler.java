@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 import static main.ru.geekbrains.Lesson2.Client.MessagePatterns.*;
 
@@ -33,7 +34,7 @@ public class ClientHandler {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         String msg = inp.readUTF();
-                        System.out.printf("Message from user %s: %s%n", login, msg);
+                        chatServer.logger.info(String.format("Message from user %s: %s", login, msg));//System.out.printf("Message from user %s: %s%n", login, msg);
 
                         String[] text = msg.split(" ");
                         if (text[0].equals(CONNECTED_USERS_REQUEST)) {
@@ -49,7 +50,12 @@ public class ClientHandler {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        /*String message = "";
+                        for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+                            message = message + System.lineSeparator() + stackTraceElement.toString();
+                        }*/
+                        chatServer.logger.error(e.getMessage(), e);//chatServer.logger.log(Level.SEVERE, "Ecveption: ", e);
+                        //e.printStackTrace();
                         break;
                     }
                 }
