@@ -1,12 +1,14 @@
 package main.ru.geekbrains.Lesson2.Server;
 
 import main.ru.geekbrains.Lesson2.Client.TextMessage;
+import org.apache.log4j.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 import static main.ru.geekbrains.Lesson2.Client.MessagePatterns.*;
 
@@ -19,6 +21,7 @@ public class ClientHandler {
     private final DataOutputStream out;
     private final Future handleThread;
     private ChatServer chatServer;
+    private static Logger logger = Logger.getLogger(ClientHandler.class.getName());
 
     public ClientHandler(String login, Socket socket, ChatServer chatServer) throws IOException {
         this.login = login;
@@ -33,7 +36,7 @@ public class ClientHandler {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         String msg = inp.readUTF();
-                        System.out.printf("Message from user %s: %s%n", login, msg);
+                        logger.info(String.format("Message from user %s: %s", login, msg));//System.out.printf("Message from user %s: %s%n", login, msg);
 
                         String[] text = msg.split(" ");
                         if (text[0].equals(CONNECTED_USERS_REQUEST)) {
@@ -49,6 +52,11 @@ public class ClientHandler {
                             }
                         }
                     } catch (IOException e) {
+                        String message = "";
+                        for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+                            message = message + System.lineSeparator() + stackTraceElement.toString();
+                        }
+                        logger.error(String.format("%s - %s", e, message));//chatServer.logger.log(Level.SEVERE, "Ecveption: ", e);
                         e.printStackTrace();
                         break;
                     }

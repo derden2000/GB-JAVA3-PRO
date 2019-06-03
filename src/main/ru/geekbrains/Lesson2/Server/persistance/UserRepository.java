@@ -1,6 +1,7 @@
 package main.ru.geekbrains.Lesson2.Server.persistance;
 
 import main.ru.geekbrains.Lesson2.Server.User;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.List;
 public class UserRepository {
 
     private static Connection conn = null;
+
+    private static Logger logger = Logger.getLogger(UserRepository.class.getName());
 
     public UserRepository(Connection conn) {
         this.conn = conn;
