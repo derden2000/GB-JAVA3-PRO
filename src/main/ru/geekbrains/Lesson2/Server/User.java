@@ -1,9 +1,20 @@
 package main.ru.geekbrains.Lesson2.Server;
 
+import main.ru.geekbrains.Lesson2.Server.annotations.*;
+
+@Table(tableName = "USERS")
 public class User {
 
+    @AutoIncrement()
+    @PrimaryKey()
+    @Field(name = "id")
     private int id;
+
+    @Unique()
+    @Field(name = "login")
     private String login;
+
+    @Field(name = "password")
     private String password;
 
     public User(int id, String login, String password) {

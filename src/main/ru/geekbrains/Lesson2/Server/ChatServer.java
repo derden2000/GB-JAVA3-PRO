@@ -88,16 +88,15 @@ public class ChatServer {
                             "&useLegacyDatetimeCode=false" +
                             "&serverTimezone=UTC",
                     "server", "123");
-            userRepository = new UserRepository(conn);
+            //Class clazz = User.class;
+            userRepository = new UserRepository(conn, User.class);
             authServiceJdbc = new AuthServiceJdbcImpl(userRepository);
             executorService = Executors.newFixedThreadPool(2);
         } catch (SQLException e) {
-            e.printStackTrace();
-            String message = "";
-            for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                message = message + System.lineSeparator() + stackTraceElement.toString();
-            }
-            logger.error(String.format("%s - %s", e, message));//logger.log(Level.SEVERE, "Exception: ", e);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            logger.error(sw.toString());//logger.log(Level.SEVERE, "Exception: ", e);
             return;
         }
 
@@ -125,17 +124,15 @@ public class ChatServer {
                     }
 
                 } catch (IOException | SQLException ex) {
-                    String message = "";
-                    for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                        message = message + System.lineSeparator() + stackTraceElement.toString();
-                    }
-                    logger.error(String.format("%s - %s", ex, message));//logger.log(Level.SEVERE, "Exception :", ex);//ex.printStackTrace();
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    logger.error(sw.toString());//logger.log(Level.SEVERE, "Exception :", ex);//ex.printStackTrace();
                 } catch (AuthException ex) {
-                    String message = "";
-                    for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                        message = message + System.lineSeparator() + stackTraceElement.toString();
-                    }
-                    logger.error(String.format("%s - %s", ex, message));//logger.log(Level.SEVERE, "Exception: ", ex);
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    logger.error(sw.toString());//logger.log(Level.SEVERE, "Exception: ", ex);
                     out.writeUTF(AUTH_FAIL_RESPONSE);
                     out.flush();
                     socket.close();
@@ -156,11 +153,10 @@ public class ChatServer {
                 }
             }
         } catch (IOException ex) {
-            String message = "";
-            for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                message = message + System.lineSeparator() + stackTraceElement.toString();
-            }
-            logger.error(String.format("%s - %s", ex, message));//logger.log(Level.SEVERE, "Ecveption: ", ex);//ex.printStackTrace();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());//logger.log(Level.SEVERE, "Ecveption: ", ex);//ex.printStackTrace();
         }
     }
 

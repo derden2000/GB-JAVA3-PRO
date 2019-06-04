@@ -3,9 +3,7 @@ package main.ru.geekbrains.Lesson2.Server;
 import main.ru.geekbrains.Lesson2.Client.TextMessage;
 import org.apache.log4j.Logger;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -52,12 +50,10 @@ public class ClientHandler {
                             }
                         }
                     } catch (IOException e) {
-                        String message = "";
-                        for(StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
-                            message = message + System.lineSeparator() + stackTraceElement.toString();
-                        }
-                        logger.error(String.format("%s - %s", e, message));//chatServer.logger.log(Level.SEVERE, "Ecveption: ", e);
-                        e.printStackTrace();
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        e.printStackTrace(pw);
+                        logger.error(sw.toString());//chatServer.logger.log(Level.SEVERE, "Ecveption: ", e)
                         break;
                     }
                 }

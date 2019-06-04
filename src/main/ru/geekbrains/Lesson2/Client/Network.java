@@ -34,7 +34,6 @@ public class Network {
             @Override
             public void run() {
                 try {
-                    System.out.println(requestConnectedUserList());
                     messageReciever.initClientsOnline(requestConnectedUserList());
                 } catch (IOException e) {
                     e.printStackTrace();
