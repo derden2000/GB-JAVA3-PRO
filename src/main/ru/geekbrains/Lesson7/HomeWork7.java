@@ -31,8 +31,8 @@ public class HomeWork7 {
         return a*b;
     }
 
-    @BeforeSuite
+    /*@BeforeSuite
     public int method3(int a, int b) {
         return a*b;
-    }
+    }*/
 }

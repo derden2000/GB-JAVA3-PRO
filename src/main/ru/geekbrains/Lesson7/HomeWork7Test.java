@@ -2,29 +2,51 @@ package main.ru.geekbrains.Lesson7;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
-public class HomeWork7Test {
+public class HomeWork7Test<T> {
 
-    public static void start(Class clazz) {
+    public static void start(Class<?> clazz) {
 
         Method[] arrMethods = clazz.getDeclaredMethods();
-        System.out.println("Массив до сортировки");
-        for(int i = 0; i<arrMethods.length; i++) {
-            System.out.println("arrMethods[" + i + "] :" + arrMethods[i].getName());
-        }
 
-        findBefore(arrMethods);
-        findAfter(arrMethods);
-        sortTest(arrMethods);
+        Method methodBefore = null;
+        Method methodAfter = null;
+        List<Method> methodList = new ArrayList<>();
 
-        System.out.println("Массив после сортировки");
-        for(int i = 0; i<arrMethods.length; i++) {
-            System.out.println("arrMethods["+i+"] :" + arrMethods[i].getName());
+        for (Method method : arrMethods) {
+            if (method.isAnnotationPresent(BeforeSuite.class)) {
+                if (methodBefore == null) {
+                    methodBefore = method;
+                } else {
+                    throw new RuntimeException();
+                }
+            } else if (method.isAnnotationPresent(AfterSuite.class)) {
+                if (methodAfter == null) {
+                    methodAfter = method;
+                } else {
+                    throw new RuntimeException();
+                }
+            } else if (method.isAnnotationPresent(Test.class)) {
+                methodList.add(method);
+            }
         }
+        methodList.sort(Comparator.comparing(g -> g.getAnnotation(Test.class).priority()));
 
         System.out.println("Печать методов");
         HomeWork7 hw7 = new HomeWork7();
-        for (Method method : arrMethods) {
+
+        try {
+            System.out.println(methodBefore.invoke(hw7,10, 5));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        for (Method method : methodList) {
             try {
                 System.out.println(method.invoke(hw7, 10, 5));
             } catch (IllegalAccessException e) {
@@ -33,64 +55,12 @@ public class HomeWork7Test {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static void findBefore(Method[] arrMethods) {
-        int count = 0;
-        for (int i = 0; i < arrMethods.length; i++) {
-            if (arrMethods[i].isAnnotationPresent(BeforeSuite.class)) {
-                count++;
-            }
-        }
-        if (count ==1) {
-            for (int i = 0; i < arrMethods.length; i++) {
-                if (arrMethods[i].isAnnotationPresent(BeforeSuite.class)) {
-                    Method buf = arrMethods[0];
-                    arrMethods[0] = arrMethods[i];
-                    arrMethods[i] = buf;
-                }
-            }
-        } else {
-            throw new RuntimeException();
-        }
-
-    }
-
-    private static void findAfter(Method[] arrMethods) {
-        int count = 0;
-        for (int i = 0; i < arrMethods.length; i++) {
-            if (arrMethods[i].isAnnotationPresent(AfterSuite.class)) {
-                count++;
-            }
-        }
-        if (count ==1) {
-            for (int i = 0; i < arrMethods.length; i++) {
-                if (arrMethods[i].isAnnotationPresent(AfterSuite.class)) {
-                    Method buf = arrMethods[arrMethods.length - 1];
-                    arrMethods[arrMethods.length - 1] = arrMethods[i];
-                    arrMethods[i] = buf;
-                }
-            }
-        } else {
-            throw new RuntimeException();
-        }
-
-    }
-
-    private static void sortTest(Method[] arrMethods) {
-        for (int i = arrMethods.length - 2; i >= 1; i--) {
-            if (arrMethods[i].isAnnotationPresent(Test.class)) {
-                for (int j = 1; j < i; j++) {
-                    int priorPrev = arrMethods[j].getAnnotation(Test.class).priority();
-                    Test testAnnotationNext = arrMethods[j + 1].getAnnotation(Test.class);
-                    int priorNext = testAnnotationNext.priority();
-                    if (priorPrev > priorNext) {
-                        Method buf = arrMethods[j];
-                        arrMethods[j] = arrMethods[j + 1];
-                        arrMethods[j + 1] = buf;
-                    }
-                }
-            }
+        try {
+            System.out.println(methodAfter.invoke(hw7, 10, 5));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
         }
     }
 
